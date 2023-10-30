@@ -277,11 +277,17 @@ class ModelFormTest(TestCase):
             boolean_nullable = Column(sqla_types.Boolean, nullable=True)
             started = Column(sqla_types.DateTime, nullable=False)
             grade = Column(AnotherInteger, nullable=False)
+            students = relationship(
+                "Student",
+                secondary=student_course,
+                back_populates="courses",
+            )
 
         class School(Model):
             __tablename__ = "school"
             id = Column(sqla_types.Integer, primary_key=True)
             name = Column(sqla_types.String(255), nullable=False)
+            students = relationship("Student", back_populates="current_school")
 
         class Student(Model):
             __tablename__ = "student"
@@ -292,11 +298,11 @@ class ModelFormTest(TestCase):
                 sqla_types.Integer, ForeignKey(School.id), nullable=False
             )
 
-            current_school = relationship(School, backref=backref("students"))
+            current_school = relationship(School, back_populates="students")
             courses = relationship(
                 "Course",
                 secondary=student_course,
-                backref=backref("students", lazy="dynamic"),
+                back_populates="students",
             )
 
         self.School = School
