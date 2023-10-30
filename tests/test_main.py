@@ -8,7 +8,6 @@ from sqlalchemy.dialects.mysql import YEAR
 from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.dialects.postgresql import MACADDR
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
@@ -26,6 +25,12 @@ from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from wtforms_sqlalchemy.orm import model_form
 from wtforms_sqlalchemy.orm import ModelConversionError
 from wtforms_sqlalchemy.orm import ModelConverter
+
+import sqlalchemy
+if sqlalchemy.__version__ < '2':
+    from sqlalchemy.ext.declarative import declarative_base
+else:
+    from sqlalchemy.orm import declarative_base
 
 from .common import contains_validator
 from .common import DummyPostData
@@ -94,8 +99,8 @@ class QuerySelectFieldTest(TestBase):
     def setUp(self):
         engine = create_engine("sqlite:///:memory:", echo=False)
         self.Session = sessionmaker(bind=engine)
-        from sqlalchemy.orm import mapper
 
+        mapper = sqlalchemy_mapper()
         self._do_tables(mapper, engine)
 
     def test_without_factory(self):
@@ -198,7 +203,7 @@ class QuerySelectFieldTest(TestBase):
 
 class QuerySelectMultipleFieldTest(TestBase):
     def setUp(self):
-        from sqlalchemy.orm import mapper
+        mapper = sqlalchemy_mapper()
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Session = sessionmaker(bind=engine)
@@ -482,3 +487,14 @@ class ModelFormTest2(TestCase):
         assert isinstance(form.timestamp, fields.DateTimeField)
 
         assert isinstance(form.date, fields.DateField)
+
+
+def sqlalchemy_mapper():
+    import sqlalchemy.orm
+    if sqlalchemy.__version__ < '2':
+        mapper = sqlalchemy.orm.mapper
+    else:
+        from sqlalchemy.orm import registry
+        mapper_registry = registry()
+        mapper = mapper_registry.map_imperatively
+    return mapper
