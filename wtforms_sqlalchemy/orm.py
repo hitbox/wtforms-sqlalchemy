@@ -211,19 +211,28 @@ class ModelConverter(ModelConverterBase):
         field_args["validators"].append(validators.NumberRange(min=1901, max=2155))
         return wtforms_fields.StringField(**field_args)
 
-    @converts("dialects.postgresql.base.INET")
+    @converts(
+        "dialects.postgresql.base.INET",
+        "dialects.postgresql.types.INET",
+    )
     def conv_PGInet(self, field_args, **extra):
         field_args.setdefault("label", "IP Address")
         field_args["validators"].append(validators.IPAddress())
         return wtforms_fields.StringField(**field_args)
 
-    @converts("dialects.postgresql.base.MACADDR")
+    @converts(
+        "dialects.postgresql.base.MACADDR",
+        "dialects.postgresql.types.MACADDR",
+    )
     def conv_PGMacaddr(self, field_args, **extra):
         field_args.setdefault("label", "MAC Address")
         field_args["validators"].append(validators.MacAddress())
         return wtforms_fields.StringField(**field_args)
 
-    @converts("dialects.postgresql.base.UUID")
+    @converts(
+        "dialects.postgresql.base.UUID",
+        "UUID",
+    )
     def conv_PGUuid(self, field_args, **extra):
         field_args.setdefault("label", "UUID")
         field_args["validators"].append(validators.UUID())
