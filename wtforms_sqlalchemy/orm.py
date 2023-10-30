@@ -3,6 +3,8 @@ Tools for generating forms based on SQLAlchemy models.
 """
 import inspect
 
+import sqlalchemy
+
 from wtforms import fields as wtforms_fields
 from wtforms import validators
 from wtforms.form import Form
@@ -262,7 +264,7 @@ def model_fields(
 
     See `model_form` docstring for description of parameters.
     """
-    mapper = model._sa_class_manager.mapper
+    mapper = sqlalchemy.inspect(model)
     converter = converter or ModelConverter()
     field_args = field_args or {}
     properties = []
